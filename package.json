@@ -15,5 +15,8 @@
     "file-type": "^16.5.3",
     "jssoup": "0.0.15",
     "workerpool": "^6.1.5"
+  },
+  "devDependencies": {
+    "axios-retry": "^3.2.4"
   }
 }

@@ -2,7 +2,9 @@
 const cheerio = require('cheerio');
 var JSSoup = require('jssoup').default;
 const axios = require('axios');
+const axiosRetry = require('axios-retry')
 
+var debugprintlevel = 4 //0 Default|Debug
 //public
 //True or false, does the core support the url given
 const supportsURL = function (url) {
@@ -14,6 +16,12 @@ const supportsURL = function (url) {
 }
 
 async function axiosget(url) {
+    axiosRetry(axios, {
+        retries: 3,
+        shouldResetTimeout: true,
+        retryCondition: (_error) => true // retry no matter what
+    });
+
     return axios.get(url, {
         headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36',
@@ -57,6 +65,7 @@ const grabinfo = async function (url) {
 }
 
 async function getImageUrls(url, chapters) {
+    debugprintlevel >= 2 ? console.log("Grabbing urls for chapter: " + url) : ""
     return new Promise(async (resolve, reject) => {
         let modifiedURL = url.substring(0, url.indexOf("chapter")) + "chapter-";
         let returnvalue = [];
@@ -67,6 +76,7 @@ async function getImageUrls(url, chapters) {
             let axiosdata = undefined;
             while(axiosdata == undefined){
                 axiosdata = await axiosget(modifiedURL + elem);
+
             }
 
             const soup = new JSSoup(axiosdata.data, false);
@@ -130,7 +140,7 @@ async function getImageUrls(url, chapters) {
             }
         });
         resolve(returnvalue);
-        console.log(returnvalue);
+        //console.log(returnvalue);
 
     })
 
